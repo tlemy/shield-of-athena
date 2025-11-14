@@ -94,6 +94,21 @@ export class DonationModal {
                         </div>
                         
                         <div class="form-group">
+                            <label for="username">Username:</label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                placeholder="YourUsername"
+                                required
+                                minlength="3"
+                                maxlength="20"
+                                pattern="[A-Za-z0-9_]+"
+                            >
+                            <small>Your name on the leaderboard (alphanumeric and underscore only)</small>
+                        </div>
+                        
+                        <div class="form-group">
                             <label for="email">Email Address:</label>
                             <input 
                                 type="email" 
@@ -207,11 +222,13 @@ export class DonationModal {
         const processingMsg = this.modal.querySelector('.processing-message');
         const errorMsg = this.modal.querySelector('.error-message');
         const colorPicker = this.modal.querySelector('#colorPicker');
+        const usernameInput = this.modal.querySelector('#username');
         const emailInput = this.modal.querySelector('#email');
         const urlInput = this.modal.querySelector('#sectionUrl');
         
         // Get form values
         const color = colorPicker.value;
+        const username = usernameInput.value.trim();
         const email = emailInput.value.trim();
         const url = urlInput.value.trim() || null;
         
@@ -241,8 +258,8 @@ export class DonationModal {
             }));
             this.stateManager.setSquares(squaresWithColor);
             
-            // Track ownership with original color and URL
-            this.stateManager.addOwnedSquares(donationResult.transactionId, selectedSquares, color, url);
+            // Track ownership with original color, URL, and username
+            this.stateManager.addOwnedSquares(donationResult.transactionId, selectedSquares, color, url, username);
             
             // Generate receipt
             const receiptResult = await this.mockAPI.generateReceipt({

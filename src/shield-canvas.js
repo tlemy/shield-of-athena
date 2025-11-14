@@ -8,6 +8,7 @@ import { ReceiptGenerator } from './receipt-generator.js';
 import { GridRenderer } from './grid-renderer.js';
 import { DonationModal } from './donation-modal.js';
 import { ShareManager } from './share-manager.js';
+import { Leaderboard } from './leaderboard.js';
 
 class ShieldCanvasComponent {
     /**
@@ -41,10 +42,20 @@ class ShieldCanvasComponent {
             lockDuration: options.lockDuration || (7 * 24 * 60 * 60 * 1000)
         };
 
-        // Create wrapper
+        // Create main layout
+        const mainLayout = document.createElement('div');
+        mainLayout.className = 'shield-main-layout';
+        container.appendChild(mainLayout);
+        
+        // Create wrapper for canvas
         const wrapper = document.createElement('div');
         wrapper.className = 'shield-canvas-wrapper';
-        container.appendChild(wrapper);
+        mainLayout.appendChild(wrapper);
+        
+        // Create leaderboard container
+        const leaderboardContainer = document.createElement('div');
+        leaderboardContainer.className = 'shield-leaderboard-container';
+        mainLayout.appendChild(leaderboardContainer);
 
         // Initialize modules
         const stateManager = new StateManager(config.gridSize, config.lockDuration);
@@ -53,6 +64,7 @@ class ShieldCanvasComponent {
         const gridRenderer = new GridRenderer(wrapper, config.gridSize, stateManager);
         const donationModal = new DonationModal(config.squarePrice, mockAPI, receiptGenerator, stateManager);
         const shareManager = new ShareManager(stateManager);
+        const leaderboard = new Leaderboard(leaderboardContainer, stateManager);
 
         // Create control panel
         const controlPanel = this.createControlPanel(wrapper, gridRenderer, donationModal, stateManager, shareManager);
@@ -76,6 +88,7 @@ class ShieldCanvasComponent {
             gridRenderer,
             donationModal,
             shareManager,
+            leaderboard,
             controlPanel
         };
 
@@ -405,6 +418,9 @@ class ShieldCanvasComponent {
         if (instance) {
             instance.stateManager.stopCleanupTimer();
             instance.gridRenderer.destroy();
+            if (instance.leaderboard) {
+                instance.leaderboard.destroy();
+            }
             instance.wrapper.remove();
             this.instances.delete(containerId);
         }

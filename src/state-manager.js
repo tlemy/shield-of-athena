@@ -81,15 +81,20 @@ export class StateManager {
      * @param {Array<{x: number, y: number}>} squares - Array of square coordinates
      * @param {string} originalColor - Original color hex code chosen at purchase
      * @param {string} url - Optional URL associated with this section
+     * @param {string} username - Username of the owner
      */
-    addOwnedSquares(transactionId, squares, originalColor, url = null) {
+    addOwnedSquares(transactionId, squares, originalColor, url = null, username = 'Anonymous') {
         this.ownership[transactionId] = {
             squares: squares.map(s => ({ x: s.x, y: s.y })),
             timestamp: Date.now(),
             originalColor: originalColor,
-            url: url
+            url: url,
+            username: username
         };
         this.saveOwnership();
+        
+        // Trigger leaderboard update
+        this.notifyListeners({ leaderboardUpdate: true });
     }
 
     /**
@@ -186,7 +191,8 @@ export class StateManager {
                     timestamp: transaction.timestamp,
                     squares,
                     count: squares.length,
-                    url: transaction.url || null
+                    url: transaction.url || null,
+                    username: transaction.username || 'Anonymous'
                 });
             }
         }
@@ -194,6 +200,37 @@ export class StateManager {
         // Sort by timestamp (newest first)
         transactions.sort((a, b) => b.timestamp - a.timestamp);
         return transactions;
+    }
+
+    /**
+     * Gets leaderboard data aggregated by username
+     * @returns {Array<{username: string, squareCount: number, rank: number}>} Sorted leaderboard
+     */
+    getLeaderboard() {
+        const userStats = {};
+        
+        // Aggregate squares by username
+        for (const transactionId in this.ownership) {
+            const transaction = this.ownership[transactionId];
+            const username = transaction.username || 'Anonymous';
+            
+            if (!userStats[username]) {
+                userStats[username] = 0;
+            }
+            userStats[username] += transaction.squares.length;
+        }
+        
+        // Convert to array and sort
+        const leaderboard = Object.entries(userStats)
+            .map(([username, squareCount]) => ({ username, squareCount }))
+            .sort((a, b) => b.squareCount - a.squareCount);
+        
+        // Add ranks
+        leaderboard.forEach((entry, index) => {
+            entry.rank = index + 1;
+        });
+        
+        return leaderboard;
     }
 
     /**
