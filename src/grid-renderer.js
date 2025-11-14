@@ -34,8 +34,11 @@ export class GridRenderer {
         this.squareSize = 10; // Base size of each square in pixels
         this.needsRedraw = true;
         
-        // Callbacks
-        this.onOwnedSquareClick = null;
+        // Paint mode
+        this.isPaintMode = false;
+        this.paintColor = '#FF0000';
+        this.isPainting = false;
+        this.isEraseMode = false;
         
         this.init();
     }
@@ -139,7 +142,14 @@ export class GridRenderer {
         const gridCoord = this.screenToGrid(mouseX, mouseY);
         
         if (e.button === 0) { // Left click
-            if (e.shiftKey || e.ctrlKey) {
+            if (this.isPaintMode && this.isValidGridCoord(gridCoord.x, gridCoord.y)) {
+                // Paint mode: start painting owned squares
+                const square = this.stateManager.getSquare(gridCoord.x, gridCoord.y);
+                if (square && this.stateManager.isOwnedSquare(gridCoord.x, gridCoord.y)) {
+                    this.isPainting = true;
+                    this.paintSquare(gridCoord.x, gridCoord.y);
+                }
+            } else if (e.shiftKey || e.ctrlKey) {
                 // Multi-select mode
                 this.isSelecting = true;
                 this.selectionStart = gridCoord;
@@ -175,7 +185,16 @@ export class GridRenderer {
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         
-        if (this.isDragging) {
+        if (this.isPainting) {
+            // Paint mode: paint owned squares as we drag
+            const gridCoord = this.screenToGrid(mouseX, mouseY);
+            if (this.isValidGridCoord(gridCoord.x, gridCoord.y)) {
+                const square = this.stateManager.getSquare(gridCoord.x, gridCoord.y);
+                if (square && this.stateManager.isOwnedSquare(gridCoord.x, gridCoord.y)) {
+                    this.paintSquare(gridCoord.x, gridCoord.y);
+                }
+            }
+        } else if (this.isDragging) {
             // Pan the view
             const dx = mouseX - this.lastMouseX;
             const dy = mouseY - this.lastMouseY;
@@ -217,26 +236,9 @@ export class GridRenderer {
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         
-        // Check if this was a click (not a drag)
-        const dx = Math.abs(mouseX - this.dragStartX);
-        const dy = Math.abs(mouseY - this.dragStartY);
-        const wasClick = dx < 5 && dy < 5;
-        
-        if (wasClick && !this.isSelecting) {
-            const gridCoord = this.screenToGrid(mouseX, mouseY);
-            if (this.isValidGridCoord(gridCoord.x, gridCoord.y)) {
-                const square = this.stateManager.getSquare(gridCoord.x, gridCoord.y);
-                if (square && this.stateManager.isOwnedSquare(gridCoord.x, gridCoord.y)) {
-                    // Trigger owned square click callback
-                    if (this.onOwnedSquareClick) {
-                        this.onOwnedSquareClick(gridCoord.x, gridCoord.y);
-                    }
-                }
-            }
-        }
-        
         this.isDragging = false;
         this.isSelecting = false;
+        this.isPainting = false;
         this.selectionStart = null;
     }
 
@@ -501,7 +503,7 @@ export class GridRenderer {
                 
                 if (isOwned) {
                     ctx.fillStyle = '#FFD700';
-                    ctx.fillText(`⭐ Click to edit color`, 20, yOffset + 40);
+                    ctx.fillText(`⭐ Your square`, 20, yOffset + 40);
                 }
             } else {
                 ctx.fillText(`Status: Available`, 20, yOffset + 20);
@@ -514,6 +516,67 @@ export class GridRenderer {
      */
     requestRedraw() {
         this.needsRedraw = true;
+    }
+
+    /**
+     * Set paint mode
+     */
+    setPaintMode(enabled) {
+        this.isPaintMode = enabled;
+        this.isPainting = false;
+        
+        // Update cursor
+        if (enabled) {
+            this.canvas.style.cursor = 'crosshair';
+        } else {
+            this.canvas.style.cursor = 'grab';
+        }
+        
+        this.needsRedraw = true;
+    }
+
+    /**
+     * Set paint color
+     */
+    setPaintColor(color) {
+        this.paintColor = color;
+    }
+
+    /**
+     * Set erase mode (reset to original color)
+     */
+    setEraseMode(enabled) {
+        this.isEraseMode = enabled;
+        
+        // Update cursor for reset mode
+        if (this.isPaintMode) {
+            if (enabled) {
+                // Use a different cursor to indicate reset mode
+                this.canvas.style.cursor = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\'%3E%3Cpath d=\'M12 4l-8 8h6v8h4v-8h6z\' fill=\'%23fbc02d\' stroke=\'%23333\' stroke-width=\'1.5\'/%3E%3C/svg%3E") 12 12, auto';
+            } else {
+                this.canvas.style.cursor = 'crosshair';
+            }
+        }
+    }
+
+    /**
+     * Paint or erase a square
+     */
+    paintSquare(x, y) {
+        if (this.isEraseMode) {
+            // Erase mode: restore to original purchase color
+            const originalColor = this.stateManager.getOriginalColor(x, y);
+            const success = this.stateManager.updateSquareColor(x, y, originalColor);
+            if (success) {
+                this.needsRedraw = true;
+            }
+        } else {
+            // Paint mode: update color
+            const success = this.stateManager.updateSquareColor(x, y, this.paintColor);
+            if (success) {
+                this.needsRedraw = true;
+            }
+        }
     }
 
     /**

@@ -70,10 +70,11 @@ export class StateManager {
     /**
      * Add owned squares for a transaction
      */
-    addOwnedSquares(transactionId, squares) {
+    addOwnedSquares(transactionId, squares, originalColor) {
         this.ownership[transactionId] = {
             squares: squares.map(s => ({ x: s.x, y: s.y })),
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            originalColor: originalColor
         };
         this.saveOwnership();
     }
@@ -107,6 +108,72 @@ export class StateManager {
             });
         }
         return owned;
+    }
+
+    /**
+     * Get original purchase color for a square
+     */
+    getOriginalColor(x, y) {
+        const key = this.getKey(x, y);
+        for (const transactionId in this.ownership) {
+            const transaction = this.ownership[transactionId];
+            if (transaction.squares.some(s => this.getKey(s.x, s.y) === key)) {
+                return transaction.originalColor || '#f5f5f5';
+            }
+        }
+        return '#f5f5f5';
+    }
+
+    /**
+     * Get transactions with their squares
+     */
+    getTransactions() {
+        const transactions = [];
+        for (const transactionId in this.ownership) {
+            const transaction = this.ownership[transactionId];
+            const squares = [];
+            
+            transaction.squares.forEach(s => {
+                const square = this.getSquare(s.x, s.y);
+                if (square) {
+                    squares.push(square);
+                }
+            });
+            
+            if (squares.length > 0) {
+                transactions.push({
+                    transactionId,
+                    timestamp: transaction.timestamp,
+                    squares,
+                    count: squares.length
+                });
+            }
+        }
+        
+        // Sort by timestamp (newest first)
+        transactions.sort((a, b) => b.timestamp - a.timestamp);
+        return transactions;
+    }
+
+    /**
+     * Get bounding box for a set of squares
+     */
+    getSquaresBounds(squares) {
+        if (squares.length === 0) return null;
+        
+        let minX = squares[0].x;
+        let maxX = squares[0].x;
+        let minY = squares[0].y;
+        let maxY = squares[0].y;
+        
+        squares.forEach(s => {
+            minX = Math.min(minX, s.x);
+            maxX = Math.max(maxX, s.x);
+            minY = Math.min(minY, s.y);
+            maxY = Math.max(maxY, s.y);
+        });
+        
+        return { minX, maxX, minY, maxY };
     }
 
     /**
