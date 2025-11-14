@@ -1,11 +1,11 @@
 # Shield of Athena - Donation Pixel Grid
 
-A collaborative pixel art canvas where users donate to claim and color squares. Each square costs $0.05 and remains locked for 7 days. Perfect for donation campaigns, fundraising events, and community engagement.
+A collaborative pixel art canvas where users donate to claim and color squares. Each square costs $0.07 and remains locked for 7 days. Perfect for donation campaigns, fundraising events, and community engagement.
 
 ## Features
 
-- **1000x1000 Grid**: One million squares for collaborative art
-- **Donation-Based**: $0.05 per square with tax-deductible receipts
+- **250x250 Grid**: 62,500 squares for collaborative art
+- **Donation-Based**: $0.07 per square with tax-deductible receipts
 - **Time Lock**: Squares locked for 7 days after claiming
 - **Color Editing**: Free unlimited color changes for owned squares during lock period
 - **Ownership Tracking**: Browser-based ownership with visual gold badge indicators
@@ -43,8 +43,8 @@ A collaborative pixel art canvas where users donate to claim and color squares. 
         
         window.addEventListener('DOMContentLoaded', () => {
             ShieldCanvas.init('shield-canvas', {
-                gridSize: 1000,
-                squarePrice: 0.05,
+                gridSize: 250,
+                squarePrice: 0.07,
                 lockDuration: 7 * 24 * 60 * 60 * 1000
             });
         });
@@ -57,8 +57,8 @@ A collaborative pixel art canvas where users donate to claim and color squares. 
 
 ```javascript
 ShieldCanvas.init('container-id', {
-    gridSize: 1000,           // Size of grid (default: 1000)
-    squarePrice: 0.05,        // Price per square in USD (default: 0.05)
+    gridSize: 250,           // Size of grid (default: 250)
+    squarePrice: 0.07,        // Price per square in USD (default: 0.07)
     lockDuration: 604800000   // Lock duration in ms (default: 7 days)
 });
 ```
@@ -104,8 +104,8 @@ Initialize the component in a container element.
 
 ```javascript
 const instance = ShieldCanvas.init('my-container', {
-    gridSize: 1000,
-    squarePrice: 0.05,
+    gridSize: 250,
+    squarePrice: 0.07,
     lockDuration: 7 * 24 * 60 * 60 * 1000
 });
 ```
@@ -113,8 +113,8 @@ const instance = ShieldCanvas.init('my-container', {
 **Parameters:**
 - `containerId` (string): ID of container element
 - `options` (object): Configuration options
-  - `gridSize` (number): Grid dimensions (default: 1000)
-  - `squarePrice` (number): Price per square USD (default: 0.05)
+  - `gridSize` (number): Grid dimensions (default: 250)
+  - `squarePrice` (number): Price per square USD (default: 0.07)
   - `lockDuration` (number): Lock period in milliseconds (default: 7 days)
 
 **Returns:** Instance object with access to all modules

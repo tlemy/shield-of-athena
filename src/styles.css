@@ -12,10 +12,10 @@
     position: relative;
     width: 100%;
     height: 800px;
-    background: #e0e0e0;
+    background: #1C1A3C;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(28, 26, 60, 0.5);
 }
 
 .shield-canvas {
@@ -35,10 +35,11 @@
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(253, 253, 254, 0.98);
     padding: 15px 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(28, 26, 60, 0.2);
+    border: 1px solid #CACAD7;
     display: flex;
     gap: 15px;
     align-items: center;
@@ -52,7 +53,7 @@
     gap: 8px;
     align-items: center;
     padding: 0 10px;
-    border-left: 2px solid #e0e0e0;
+    border-left: 2px solid #CACAD7;
 }
 
 .control-group:first-child {
@@ -66,7 +67,7 @@
     text-align: center;
     font-size: 13px;
     font-weight: 600;
-    color: #666;
+    color: #7373A8;
     padding: 0 8px;
 }
 
@@ -101,22 +102,22 @@
 }
 
 .btn-primary {
-    background: #4CAF50;
+    background: #1C1A3C;
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: #45a049;
+    background: #7373A8;
 }
 
 .btn-secondary {
-    background: #f5f5f5;
-    color: #333;
-    border: 1px solid #ddd;
+    background: #FDFDFE;
+    color: #1C1A3C;
+    border: 1px solid #CACAD7;
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background: #e0e0e0;
+    background: #CACAD7;
 }
 
 .btn-icon {
@@ -124,36 +125,38 @@
     height: 36px;
     padding: 0;
     font-size: 18px;
-    background: #f5f5f5;
-    color: #333;
-    border: 1px solid #ddd;
+    background: #FDFDFE;
+    color: #1C1A3C;
+    border: 1px solid #CACAD7;
 }
 
 .btn-icon:hover:not(:disabled) {
-    background: #e0e0e0;
+    background: #7373A8;
+    color: white;
 }
 
 .btn-small {
     padding: 6px 12px;
     font-size: 12px;
-    background: #f5f5f5;
-    color: #666;
-    border: 1px solid #ddd;
+    background: #FDFDFE;
+    color: #7373A8;
+    border: 1px solid #CACAD7;
 }
 
 .btn-small:hover:not(:disabled) {
-    background: #e0e0e0;
+    background: #7373A8;
+    color: white;
 }
 
 .btn-text {
     background: transparent;
-    color: #666;
+    color: #7373A8;
     padding: 8px 16px;
     text-decoration: underline;
 }
 
 .btn-text:hover:not(:disabled) {
-    color: #333;
+    color: #1C1A3C;
     box-shadow: none;
 }
 
@@ -182,13 +185,14 @@
 
 .modal-content {
     position: relative;
-    background: white;
+    background: #FDFDFE;
     border-radius: 12px;
     max-width: 500px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 40px rgba(28, 26, 60, 0.3);
+    border: 1px solid #CACAD7;
     animation: modalSlideIn 0.3s ease;
 }
 
@@ -205,7 +209,7 @@
 
 .modal-header {
     padding: 24px 24px 16px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #CACAD7;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -214,14 +218,14 @@
 .modal-header h2 {
     margin: 0;
     font-size: 24px;
-    color: #333;
+    color: #1C1A3C;
 }
 
 .close-btn {
     background: none;
     border: none;
     font-size: 32px;
-    color: #999;
+    color: #7373A8;
     cursor: pointer;
     padding: 0;
     width: 32px;
@@ -234,8 +238,8 @@
 }
 
 .close-btn:hover {
-    background: #f5f5f5;
-    color: #333;
+    background: #CACAD7;
+    color: #1C1A3C;
 }
 
 .modal-body {
@@ -244,25 +248,27 @@
 
 /* Donation Summary */
 .donation-summary {
-    background: #f9f9f9;
+    background: #FAFAF7;
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 24px;
+    border: 1px solid #CACAD7;
 }
 
 .summary-row {
     display: flex;
     justify-content: space-between;
     padding: 8px 0;
-    color: #666;
+    color: #7373A8;
 }
 
 .summary-row.total {
-    border-top: 2px solid #ddd;
+    border-top: 2px solid #CACAD7;
     margin-top: 8px;
     padding-top: 12px;
     font-size: 18px;
-    color: #333;
+    color: #1C1A3C;
+    font-weight: 600;
 }
 
 /* Form Styles */
@@ -280,27 +286,29 @@
 
 .form-group label {
     font-weight: 600;
-    color: #333;
+    color: #1C1A3C;
     font-size: 14px;
 }
 
 .form-group input[type="email"],
 .form-group input[type="text"] {
     padding: 12px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #CACAD7;
     border-radius: 6px;
     font-size: 14px;
     font-family: inherit;
+    background: #FDFDFE;
+    color: #1C1A3C;
     transition: border-color 0.2s ease;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #4CAF50;
+    border-color: #7373A8;
 }
 
 .form-group small {
-    color: #999;
+    color: #7373A8;
     font-size: 12px;
 }
 
@@ -314,9 +322,10 @@
 .color-picker-wrapper input[type="color"] {
     width: 100%;
     height: 60px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #CACAD7;
     border-radius: 6px;
     cursor: pointer;
+    background: #FDFDFE;
 }
 
 .color-presets {
@@ -328,7 +337,7 @@
 .color-preset {
     width: 100%;
     height: 40px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #CACAD7;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -336,7 +345,8 @@
 
 .color-preset:hover {
     transform: scale(1.1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(115, 115, 168, 0.3);
+    border-color: #7373A8;
 }
 
 /* Checkbox */
@@ -346,7 +356,7 @@
     gap: 10px;
     cursor: pointer;
     font-size: 14px;
-    color: #666;
+    color: #7373A8;
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -370,15 +380,15 @@
 .processing-message {
     text-align: center;
     padding: 20px;
-    color: #666;
+    color: #7373A8;
 }
 
 .spinner {
     width: 40px;
     height: 40px;
     margin: 0 auto 16px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #4CAF50;
+    border: 4px solid #CACAD7;
+    border-top: 4px solid #7373A8;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -408,7 +418,7 @@
     width: 80px;
     height: 80px;
     margin: 0 auto 20px;
-    background: #4CAF50;
+    background: #1C1A3C;
     color: white;
     border-radius: 50%;
     display: flex;
@@ -432,11 +442,11 @@
 
 .success-message h3 {
     margin: 0 0 10px 0;
-    color: #333;
+    color: #1C1A3C;
 }
 
 .success-message p {
-    color: #666;
+    color: #7373A8;
     margin: 8px 0;
 }
 
@@ -534,7 +544,7 @@
 
     .control-group {
         border-left: none;
-        border-top: 1px solid #e0e0e0;
+        border-top: 1px solid #CACAD7;
         padding: 8px 0;
     }
 
@@ -557,7 +567,7 @@
 .btn:focus-visible,
 input:focus-visible,
 .color-preset:focus-visible {
-    outline: 3px solid #4CAF50;
+    outline: 3px solid #7373A8;
     outline-offset: 2px;
 }
 
@@ -584,9 +594,9 @@ input:focus-visible,
 
 /* Paint Mode Button */
 .paint-mode-btn.active {
-    background: #FF5722 !important;
+    background: #1C1A3C !important;
     color: white !important;
-    border-color: #E64A19 !important;
+    border-color: #7373A8 !important;
 }
 
 /* Paint Color Picker Inline */
@@ -595,16 +605,16 @@ input:focus-visible,
     align-items: center;
     gap: 8px;
     padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(253, 253, 254, 0.98);
     border-radius: 6px;
-    border: 2px solid #FF5722;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    border: 2px solid #7373A8;
+    box-shadow: 0 2px 6px rgba(28, 26, 60, 0.15);
 }
 
 .paint-color-picker input[type="color"] {
     width: 40px;
     height: 40px;
-    border: 2px solid #ddd;
+    border: 2px solid #CACAD7;
     border-radius: 6px;
     cursor: pointer;
     padding: 0;
@@ -618,7 +628,7 @@ input:focus-visible,
 .color-preset-small {
     width: 28px;
     height: 28px;
-    border: 2px solid #ddd;
+    border: 2px solid #CACAD7;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -627,17 +637,17 @@ input:focus-visible,
 
 .color-preset-small:hover {
     transform: scale(1.15);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-    border-color: #999;
+    box-shadow: 0 2px 6px rgba(115, 115, 168, 0.3);
+    border-color: #7373A8;
 }
 
 /* Eraser/Reset Button */
 .eraser-btn {
     width: 40px;
     height: 40px;
-    border: 2px solid #ddd;
+    border: 2px solid #CACAD7;
     border-radius: 6px;
-    background: #fff;
+    background: #FDFDFE;
     cursor: pointer;
     font-size: 24px;
     transition: all 0.2s ease;
@@ -650,14 +660,15 @@ input:focus-visible,
 
 .eraser-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-    border-color: #999;
+    box-shadow: 0 2px 6px rgba(115, 115, 168, 0.3);
+    border-color: #7373A8;
 }
 
 .eraser-btn.active {
-    background: #ffeb3b;
-    border-color: #fbc02d;
-    box-shadow: 0 0 10px rgba(251, 192, 45, 0.5);
+    background: #7373A8;
+    border-color: #1C1A3C;
+    color: white;
+    box-shadow: 0 0 10px rgba(115, 115, 168, 0.5);
     font-weight: bold;
 }
 

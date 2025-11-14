@@ -25,8 +25,8 @@ class ShieldCanvasComponent {
 
         // Default options
         const config = {
-            gridSize: options.gridSize || 1000,
-            squarePrice: options.squarePrice || 0.05,
+            gridSize: options.gridSize || 250,
+            squarePrice: options.squarePrice || 0.07,
             lockDuration: options.lockDuration || (7 * 24 * 60 * 60 * 1000)
         };
 

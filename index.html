@@ -10,7 +10,7 @@
             margin: 0;
             padding: 20px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f5f5;
+            background: #FAFAF7;
         }
         .header {
             text-align: center;
@@ -18,10 +18,10 @@
         }
         .header h1 {
             margin: 0;
-            color: #333;
+            color: #1C1A3C;
         }
         .header p {
-            color: #666;
+            color: #7373A8;
             margin: 10px 0;
         }
         .container {
@@ -29,17 +29,20 @@
             margin: 0 auto;
         }
         .instructions {
-            background: white;
+            background: #FDFDFE;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(28, 26, 60, 0.1);
+            border: 1px solid #CACAD7;
         }
         .instructions h2 {
             margin-top: 0;
+            color: #1C1A3C;
         }
         .instructions ul {
             line-height: 1.8;
+            color: #1C1A3C;
         }
     </style>
 </head>
@@ -48,7 +51,7 @@
         <div class="header">
             <h1>Shield of Athena</h1>
             <p>Collaborative Pixel Art for a Cause</p>
-            <p><strong>$0.05 per square · 7-day lock · Tax-deductible receipt</strong></p>
+            <p><strong>$0.07 per square · 7-day lock · Tax-deductible receipt</strong></p>
         </div>
 
         <div class="instructions">
@@ -56,7 +59,7 @@
             <ul>
                 <li><strong>Select Squares:</strong> Click on any available square (white) to select it</li>
                 <li><strong>Multi-Select:</strong> Hold and drag to select multiple squares at once</li>
-                <li><strong>Donate:</strong> Click "Donate & Color" to proceed with payment ($0.05 per square)</li>
+                <li><strong>Donate:</strong> Click "Donate & Color" to proceed with payment ($0.07 per square)</li>
                 <li><strong>Choose Color:</strong> Pick your color and enter your email for the tax receipt</li>
                 <li><strong>Lock Period:</strong> Your squares will be protected for 7 days</li>
                 <li><strong>Edit Colors:</strong> Click owned squares (with gold badge ⭐) to change their color anytime - free!</li>
@@ -78,8 +81,8 @@
         
         window.addEventListener('DOMContentLoaded', () => {
             ShieldCanvas.init('shield-canvas', {
-                gridSize: 1000,
-                squarePrice: 0.05,
+                gridSize: 250,
+                squarePrice: 0.07,
                 lockDuration: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
             });
         });
