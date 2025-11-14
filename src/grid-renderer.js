@@ -258,6 +258,25 @@ export class GridRenderer {
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         
+        // Check if this was a Ctrl+Click on a square with a URL
+        const dragDistance = Math.sqrt(
+            Math.pow(mouseX - this.dragStartX, 2) + 
+            Math.pow(mouseY - this.dragStartY, 2)
+        );
+        
+        if (dragDistance < 5 && (e.ctrlKey || e.metaKey)) {
+            const gridCoord = this.screenToGrid(mouseX, mouseY);
+            if (this.isValidGridCoord(gridCoord.x, gridCoord.y)) {
+                const square = this.stateManager.getSquare(gridCoord.x, gridCoord.y);
+                if (square) {
+                    const url = this.stateManager.getSquareUrl(gridCoord.x, gridCoord.y);
+                    if (url) {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                    }
+                }
+            }
+        }
+        
         this.isDragging = false;
         this.isSelecting = false;
         this.isPainting = false;
@@ -480,11 +499,18 @@ export class GridRenderer {
                     ctx.strokeRect(screenPos.x, screenPos.y, squareScreenSize, squareScreenSize);
                 }
                 
-                // Draw hover highlight
+                // Draw hover highlight (inset to avoid affecting adjacent squares)
                 if (isHovered) {
                     ctx.strokeStyle = isOwned ? '#FFD700' : (square ? '#ff9800' : '#2196F3');
-                    ctx.lineWidth = Math.max(2, squareScreenSize * 0.1);
-                    ctx.strokeRect(screenPos.x, screenPos.y, squareScreenSize, squareScreenSize);
+                    const lineWidth = Math.max(2, squareScreenSize * 0.1);
+                    ctx.lineWidth = lineWidth;
+                    const inset = lineWidth / 2;
+                    ctx.strokeRect(
+                        screenPos.x + inset, 
+                        screenPos.y + inset, 
+                        squareScreenSize - lineWidth, 
+                        squareScreenSize - lineWidth
+                    );
                 }
                 
                 // Draw grid lines (only when zoomed in enough)
@@ -507,12 +533,29 @@ export class GridRenderer {
         const ctx = this.ctx;
         
         const ownedCount = this.stateManager.getOwnedSquares().length;
-        const infoHeight = this.hoveredSquare ? (ownedCount > 0 ? 130 : 110) : 70;
         
-        // Draw info text
+        // Calculate info height dynamically
+        let infoLines = ownedCount > 0 ? 3 : 2;
+        if (this.hoveredSquare) {
+            infoLines++; // Square coordinates
+            const square = this.stateManager.getSquare(this.hoveredSquare.x, this.hoveredSquare.y);
+            if (square) {
+                infoLines++; // Lock status
+                const isOwned = this.stateManager.isOwnedSquare(this.hoveredSquare.x, this.hoveredSquare.y);
+                if (isOwned) infoLines++;
+                const url = this.stateManager.getSquareUrl(this.hoveredSquare.x, this.hoveredSquare.y);
+                if (url) infoLines++;
+            } else {
+                infoLines++; // Available status
+            }
+        }
+        const infoHeight = 50 + (infoLines * 20);
+        
+        // Draw info background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(10, 10, 280, infoHeight);
         
+        // Draw basic info
         ctx.fillStyle = '#ffffff';
         ctx.font = '14px Arial';
         ctx.fillText(`Zoom: ${(this.scale * 100).toFixed(0)}%`, 20, 30);
@@ -523,10 +566,12 @@ export class GridRenderer {
             ctx.fillText(`⭐ You own: ${ownedCount} squares`, 20, 70);
         }
         
+        // Draw hovered square info
         if (this.hoveredSquare) {
             const { x, y } = this.hoveredSquare;
             const square = this.stateManager.getSquare(x, y);
             const isOwned = square && this.stateManager.isOwnedSquare(x, y);
+            const url = this.stateManager.getSquareUrl(x, y);
             
             ctx.fillStyle = '#ffffff';
             const yOffset = ownedCount > 0 ? 90 : 70;
@@ -536,9 +581,17 @@ export class GridRenderer {
                 const remaining = this.stateManager.getTimeRemaining(x, y);
                 ctx.fillText(`Locked: ${this.stateManager.formatTimeRemaining(remaining)}`, 20, yOffset + 20);
                 
+                let nextOffset = yOffset + 40;
                 if (isOwned) {
                     ctx.fillStyle = '#FFD700';
-                    ctx.fillText(`⭐ Your square`, 20, yOffset + 40);
+                    ctx.fillText(`⭐ Your square`, 20, nextOffset);
+                    nextOffset += 20;
+                    ctx.fillStyle = '#ffffff';
+                }
+                
+                if (url) {
+                    ctx.fillStyle = '#4CAF50';
+                    ctx.fillText(`🔗 Ctrl+Click to visit link`, 20, nextOffset);
                 }
             } else {
                 ctx.fillText(`Status: Available`, 20, yOffset + 20);

@@ -12,7 +12,7 @@
    # Then visit: http://localhost:8000
    ```
 
-2. You should see a 250x250 pixel grid with controls at the top
+2. You should see a 200x200 pixel grid with controls at the top
 
 ## Testing the Features
 
@@ -150,7 +150,7 @@ For best performance:
 - Use Chrome or Edge (best canvas performance)
 - Close other tabs to free up memory
 - Don't zoom in too far (renders more squares)
-- Limit selection to < 250 squares at once
+- Limit selection to < 200 squares at once
 
 ## Questions?
 

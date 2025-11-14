@@ -75,13 +75,14 @@
     <script type="module" src="src/receipt-generator.js"></script>
     <script type="module" src="src/grid-renderer.js"></script>
     <script type="module" src="src/donation-modal.js"></script>
+    <script type="module" src="src/share-manager.js"></script>
     <script type="module" src="src/shield-canvas.js"></script>
     <script type="module">
         import { ShieldCanvas } from './src/shield-canvas.js';
         
         window.addEventListener('DOMContentLoaded', () => {
             ShieldCanvas.init('shield-canvas', {
-                gridSize: 250,
+                gridSize: 200,
                 squarePrice: 0.07,
                 lockDuration: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
             });

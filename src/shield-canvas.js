@@ -7,6 +7,7 @@ import { MockAPI } from './api-mock.js';
 import { ReceiptGenerator } from './receipt-generator.js';
 import { GridRenderer } from './grid-renderer.js';
 import { DonationModal } from './donation-modal.js';
+import { ShareManager } from './share-manager.js';
 
 class ShieldCanvasComponent {
     /**
@@ -51,9 +52,10 @@ class ShieldCanvasComponent {
         const receiptGenerator = new ReceiptGenerator();
         const gridRenderer = new GridRenderer(wrapper, config.gridSize, stateManager);
         const donationModal = new DonationModal(config.squarePrice, mockAPI, receiptGenerator, stateManager);
+        const shareManager = new ShareManager(stateManager);
 
         // Create control panel
-        const controlPanel = this.createControlPanel(wrapper, gridRenderer, donationModal, stateManager);
+        const controlPanel = this.createControlPanel(wrapper, gridRenderer, donationModal, stateManager, shareManager);
 
         // Start cleanup timer
         stateManager.startCleanupTimer();
@@ -73,6 +75,7 @@ class ShieldCanvasComponent {
             receiptGenerator,
             gridRenderer,
             donationModal,
+            shareManager,
             controlPanel
         };
 
@@ -86,9 +89,10 @@ class ShieldCanvasComponent {
      * @param {GridRenderer} gridRenderer - Grid renderer instance
      * @param {DonationModal} donationModal - Donation modal instance
      * @param {StateManager} stateManager - State manager instance
+     * @param {ShareManager} shareManager - Share manager instance
      * @returns {HTMLElement} Control panel element
      */
-    createControlPanel(wrapper, gridRenderer, donationModal, stateManager) {
+    createControlPanel(wrapper, gridRenderer, donationModal, stateManager, shareManager) {
         const panel = document.createElement('div');
         panel.className = 'control-panel';
         panel.innerHTML = `
@@ -109,6 +113,7 @@ class ShieldCanvasComponent {
                 <button class="btn btn-icon" id="prevTransactionBtn" title="Previous Transaction" disabled>◀</button>
                 <span id="transactionPosition" class="position-indicator">-</span>
                 <button class="btn btn-icon" id="nextTransactionBtn" title="Next Transaction" disabled>▶</button>
+                <button class="btn btn-small" id="shareBtn" title="Share Section" disabled>📤 Share</button>
             </div>
             <div class="control-group">
                 <button class="btn btn-small" id="paintModeBtn" class="paint-mode-btn">🖌 Paint Mode</button>
@@ -133,7 +138,7 @@ class ShieldCanvasComponent {
         wrapper.appendChild(panel);
 
         // Attach event listeners
-        this.attachControlListeners(panel, gridRenderer, donationModal, stateManager);
+        this.attachControlListeners(panel, gridRenderer, donationModal, stateManager, shareManager);
 
         return panel;
     }
@@ -145,8 +150,9 @@ class ShieldCanvasComponent {
      * @param {GridRenderer} gridRenderer - Grid renderer instance
      * @param {DonationModal} donationModal - Donation modal instance
      * @param {StateManager} stateManager - State manager instance
+     * @param {ShareManager} shareManager - Share manager instance
      */
-    attachControlListeners(panel, gridRenderer, donationModal, stateManager) {
+    attachControlListeners(panel, gridRenderer, donationModal, stateManager, shareManager) {
         const donateBtn = panel.querySelector('#donateBtn');
         const clearSelectionBtn = panel.querySelector('#clearSelectionBtn');
         const selectedCountSpan = panel.querySelector('#selectedCount');
@@ -156,6 +162,7 @@ class ShieldCanvasComponent {
         const prevTransactionBtn = panel.querySelector('#prevTransactionBtn');
         const nextTransactionBtn = panel.querySelector('#nextTransactionBtn');
         const transactionPositionSpan = panel.querySelector('#transactionPosition');
+        const shareBtn = panel.querySelector('#shareBtn');
         const paintModeBtn = panel.querySelector('#paintModeBtn');
         const paintColorPickerDiv = panel.querySelector('#paintColorPicker');
         const paintColorInput = panel.querySelector('#paintColor');
@@ -182,6 +189,7 @@ class ShieldCanvasComponent {
             // Update navigation buttons
             prevTransactionBtn.disabled = !hasTransactions;
             nextTransactionBtn.disabled = !hasTransactions;
+            shareBtn.disabled = !hasTransactions;
             clearMySquaresBtn.disabled = !hasTransactions;
             paintModeBtn.disabled = !hasTransactions;
             
@@ -296,6 +304,15 @@ class ShieldCanvasComponent {
         // Next transaction button
         nextTransactionBtn.addEventListener('click', () => {
             navigateToTransaction(currentTransactionIndex + 1);
+        });
+
+        // Share button
+        shareBtn.addEventListener('click', () => {
+            const transactions = stateManager.getTransactions();
+            if (transactions.length > 0) {
+                const transaction = transactions[currentTransactionIndex];
+                shareManager.showShareModal(transaction.transactionId);
+            }
         });
 
         // Paint mode toggle

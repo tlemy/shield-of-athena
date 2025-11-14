@@ -80,14 +80,33 @@ export class StateManager {
      * @param {string} transactionId - Unique transaction identifier
      * @param {Array<{x: number, y: number}>} squares - Array of square coordinates
      * @param {string} originalColor - Original color hex code chosen at purchase
+     * @param {string} url - Optional URL associated with this section
      */
-    addOwnedSquares(transactionId, squares, originalColor) {
+    addOwnedSquares(transactionId, squares, originalColor, url = null) {
         this.ownership[transactionId] = {
             squares: squares.map(s => ({ x: s.x, y: s.y })),
             timestamp: Date.now(),
-            originalColor: originalColor
+            originalColor: originalColor,
+            url: url
         };
         this.saveOwnership();
+    }
+
+    /**
+     * Gets the URL associated with a square's section
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @returns {string|null} URL or null if not set
+     */
+    getSquareUrl(x, y) {
+        const key = this.getKey(x, y);
+        for (const transactionId in this.ownership) {
+            const transaction = this.ownership[transactionId];
+            if (transaction.squares.some(s => this.getKey(s.x, s.y) === key)) {
+                return transaction.url || null;
+            }
+        }
+        return null;
     }
 
     /**
@@ -166,7 +185,8 @@ export class StateManager {
                     transactionId,
                     timestamp: transaction.timestamp,
                     squares,
-                    count: squares.length
+                    count: squares.length,
+                    url: transaction.url || null
                 });
             }
         }

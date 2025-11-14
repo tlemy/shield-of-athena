@@ -106,6 +106,17 @@ export class DonationModal {
                         </div>
                         
                         <div class="form-group">
+                            <label for="sectionUrl">Section URL (Optional):</label>
+                            <input 
+                                type="url" 
+                                id="sectionUrl" 
+                                name="url" 
+                                placeholder="https://example.com"
+                            >
+                            <small>Link this section to your website or social media (Ctrl+Click to visit)</small>
+                        </div>
+                        
+                        <div class="form-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="terms" required>
                                 <span>I understand this is a charitable donation and my squares will be locked for 7 days</span>
@@ -197,10 +208,12 @@ export class DonationModal {
         const errorMsg = this.modal.querySelector('.error-message');
         const colorPicker = this.modal.querySelector('#colorPicker');
         const emailInput = this.modal.querySelector('#email');
+        const urlInput = this.modal.querySelector('#sectionUrl');
         
         // Get form values
         const color = colorPicker.value;
         const email = emailInput.value.trim();
+        const url = urlInput.value.trim() || null;
         
         // Disable form
         submitBtn.disabled = true;
@@ -228,8 +241,8 @@ export class DonationModal {
             }));
             this.stateManager.setSquares(squaresWithColor);
             
-            // Track ownership with original color
-            this.stateManager.addOwnedSquares(donationResult.transactionId, selectedSquares, color);
+            // Track ownership with original color and URL
+            this.stateManager.addOwnedSquares(donationResult.transactionId, selectedSquares, color, url);
             
             // Generate receipt
             const receiptResult = await this.mockAPI.generateReceipt({
