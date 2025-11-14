@@ -3,6 +3,12 @@
  */
 
 export class GridRenderer {
+    /**
+     * Creates a new GridRenderer instance for canvas-based grid visualization
+     * @param {HTMLElement} container - DOM container for the canvas
+     * @param {number} gridSize - Size of the grid (number of squares per side)
+     * @param {StateManager} stateManager - State management service
+     */
     constructor(container, gridSize, stateManager) {
         this.container = container;
         this.gridSize = gridSize;
@@ -44,7 +50,7 @@ export class GridRenderer {
     }
 
     /**
-     * Initialize renderer
+     * Initializes the renderer by setting up canvas and starting render loop
      */
     init() {
         this.setupCanvas();
@@ -54,7 +60,8 @@ export class GridRenderer {
     }
 
     /**
-     * Setup canvas element
+     * Sets up the canvas element and appends it to container
+     * Configures resize handling
      */
     setupCanvas() {
         this.canvas.className = 'shield-canvas';
@@ -66,7 +73,8 @@ export class GridRenderer {
     }
 
     /**
-     * Resize canvas to fit container
+     * Resizes canvas to match container dimensions
+     * Called on window resize events
      */
     resize() {
         const rect = this.container.getBoundingClientRect();
@@ -76,7 +84,8 @@ export class GridRenderer {
     }
 
     /**
-     * Center view on grid
+     * Centers the viewport on the grid
+     * Adjusts offset to position grid center in canvas center
      */
     centerView() {
         const centerX = (this.canvas.width / 2) - (this.gridSize * this.squareSize * this.scale / 2);
@@ -87,7 +96,8 @@ export class GridRenderer {
     }
 
     /**
-     * Attach event listeners for interaction
+     * Attaches all mouse and touch event listeners for canvas interaction
+     * Handles pan, zoom, selection, and paint interactions
      */
     attachEventListeners() {
         // Mouse events
@@ -107,7 +117,10 @@ export class GridRenderer {
     }
 
     /**
-     * Convert screen coordinates to grid coordinates
+     * Converts screen (canvas) coordinates to grid coordinates
+     * @param {number} screenX - X coordinate on canvas in pixels
+     * @param {number} screenY - Y coordinate on canvas in pixels
+     * @returns {{x: number, y: number}} Grid coordinates
      */
     screenToGrid(screenX, screenY) {
         const gridX = Math.floor((screenX - this.offsetX) / (this.squareSize * this.scale));
@@ -116,7 +129,10 @@ export class GridRenderer {
     }
 
     /**
-     * Convert grid coordinates to screen coordinates
+     * Converts grid coordinates to screen (canvas) coordinates
+     * @param {number} gridX - Grid X coordinate
+     * @param {number} gridY - Grid Y coordinate
+     * @returns {{x: number, y: number}} Screen coordinates in pixels
      */
     gridToScreen(gridX, gridY) {
         const screenX = gridX * this.squareSize * this.scale + this.offsetX;
@@ -125,14 +141,18 @@ export class GridRenderer {
     }
 
     /**
-     * Check if grid coordinates are valid
+     * Validates if grid coordinates are within bounds
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @returns {boolean} True if coordinates are valid
      */
     isValidGridCoord(x, y) {
         return x >= 0 && x < this.gridSize && y >= 0 && y < this.gridSize;
     }
 
     /**
-     * Handle mouse down
+     * Handles mouse down events for selection, panning, and painting
+     * @param {MouseEvent} e - Mouse event object
      */
     handleMouseDown(e) {
         const rect = this.canvas.getBoundingClientRect();
@@ -178,7 +198,8 @@ export class GridRenderer {
     }
 
     /**
-     * Handle mouse move
+     * Handles mouse move events for panning, selecting, and painting
+     * @param {MouseEvent} e - Mouse event object
      */
     handleMouseMove(e) {
         const rect = this.canvas.getBoundingClientRect();
@@ -229,7 +250,8 @@ export class GridRenderer {
     }
 
     /**
-     * Handle mouse up
+     * Handles mouse up events to end interactions
+     * @param {MouseEvent} e - Mouse event object
      */
     handleMouseUp(e) {
         const rect = this.canvas.getBoundingClientRect();
@@ -243,7 +265,8 @@ export class GridRenderer {
     }
 
     /**
-     * Handle mouse leave
+     * Handles mouse leaving canvas to reset interaction states
+     * @param {MouseEvent} e - Mouse event object
      */
     handleMouseLeave(e) {
         this.isDragging = false;
@@ -254,7 +277,9 @@ export class GridRenderer {
     }
 
     /**
-     * Handle mouse wheel for zooming
+     * Handles mouse wheel events for zooming in/out
+     * Zooms toward mouse cursor position
+     * @param {WheelEvent} e - Wheel event object
      */
     handleWheel(e) {
         e.preventDefault();
@@ -279,7 +304,8 @@ export class GridRenderer {
     }
 
     /**
-     * Handle touch start
+     * Handles touch start events for mobile support
+     * @param {TouchEvent} e - Touch event object
      */
     handleTouchStart(e) {
         if (e.touches.length === 1) {
@@ -295,7 +321,8 @@ export class GridRenderer {
     }
 
     /**
-     * Handle touch move
+     * Handles touch move events for mobile support
+     * @param {TouchEvent} e - Touch event object
      */
     handleTouchMove(e) {
         e.preventDefault();
@@ -309,14 +336,17 @@ export class GridRenderer {
     }
 
     /**
-     * Handle touch end
+     * Handles touch end events for mobile support
+     * @param {TouchEvent} e - Touch event object
      */
     handleTouchEnd(e) {
         this.handleMouseUp(e);
     }
 
     /**
-     * Toggle square selection
+     * Toggles selection state of a square at given coordinates
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
      */
     toggleSquareSelection(x, y) {
         const key = `${x},${y}`;
@@ -331,7 +361,9 @@ export class GridRenderer {
     }
 
     /**
-     * Update drag selection
+     * Updates selection based on drag area (rectangular selection)
+     * @param {{x: number, y: number}} start - Starting grid coordinates
+     * @param {{x: number, y: number}} end - Ending grid coordinates
      */
     updateDragSelection(start, end) {
         // Clear previous selection
@@ -355,7 +387,7 @@ export class GridRenderer {
     }
 
     /**
-     * Clear selection
+     * Clears all selected squares
      */
     clearSelection() {
         this.selectedSquares.clear();
@@ -363,7 +395,8 @@ export class GridRenderer {
     }
 
     /**
-     * Get selected squares as array
+     * Returns currently selected squares as an array of coordinate objects
+     * @returns {Array<{x: number, y: number}>} Array of selected square coordinates
      */
     getSelectedSquares() {
         return Array.from(this.selectedSquares).map(key => {
@@ -373,7 +406,8 @@ export class GridRenderer {
     }
 
     /**
-     * Start render loop
+     * Starts the continuous render loop using requestAnimationFrame
+     * Only renders when needsRedraw flag is true for performance
      */
     startRenderLoop() {
         const render = () => {
@@ -387,7 +421,8 @@ export class GridRenderer {
     }
 
     /**
-     * Main render function
+     * Main render function that draws the grid to canvas
+     * Implements viewport culling for performance
      */
     render() {
         const ctx = this.ctx;
@@ -466,7 +501,7 @@ export class GridRenderer {
     }
 
     /**
-     * Draw UI overlay
+     * Draws UI overlay with info panel showing zoom level, selection, and hovered square
      */
     drawUI() {
         const ctx = this.ctx;
@@ -512,14 +547,15 @@ export class GridRenderer {
     }
 
     /**
-     * Request redraw
+     * Flags the renderer to redraw on next frame
      */
     requestRedraw() {
         this.needsRedraw = true;
     }
 
     /**
-     * Set paint mode
+     * Enables or disables paint mode for coloring owned squares
+     * @param {boolean} enabled - Whether to enable paint mode
      */
     setPaintMode(enabled) {
         this.isPaintMode = enabled;
@@ -536,14 +572,16 @@ export class GridRenderer {
     }
 
     /**
-     * Set paint color
+     * Sets the color to use for painting squares
+     * @param {string} color - Hex color code (e.g., '#FF0000')
      */
     setPaintColor(color) {
         this.paintColor = color;
     }
 
     /**
-     * Set erase mode (reset to original color)
+     * Enables or disables erase mode to reset squares to original color
+     * @param {boolean} enabled - Whether to enable erase mode
      */
     setEraseMode(enabled) {
         this.isEraseMode = enabled;
@@ -560,7 +598,9 @@ export class GridRenderer {
     }
 
     /**
-     * Paint or erase a square
+     * Paints or erases a square (resets to original color if in erase mode)
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
      */
     paintSquare(x, y) {
         if (this.isEraseMode) {
@@ -580,7 +620,7 @@ export class GridRenderer {
     }
 
     /**
-     * Destroy renderer
+     * Cleans up and removes the canvas element
      */
     destroy() {
         this.canvas.remove();

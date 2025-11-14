@@ -3,26 +3,39 @@
  */
 
 export class MockAPI {
+    /**
+     * Creates a new MockAPI instance
+     * Simulates backend API endpoints with realistic network delays
+     */
     constructor() {
         this.baseDelay = 500; // Simulate network delay
     }
 
     /**
-     * Simulate network delay
+     * Simulates network delay for API calls
+     * @param {number} ms - Delay duration in milliseconds (default: baseDelay)
+     * @returns {Promise<void>} Resolves after the specified delay
      */
     async delay(ms = this.baseDelay) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     /**
-     * Generate unique transaction ID
+     * Generates a unique transaction ID for donation tracking
+     * @returns {string} Unique transaction ID in format TXN-{timestamp}-{random}
      */
     generateTransactionId() {
         return `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     }
 
     /**
-     * Process donation
+     * Processes a donation request and validates input data
+     * @param {Object} donationData - The donation information
+     * @param {string} donationData.email - Donor's email address
+     * @param {Array<{x: number, y: number}>} donationData.squares - Selected grid squares
+     * @param {string} donationData.color - Selected color for the squares
+     * @param {number} donationData.totalAmount - Total donation amount in dollars
+     * @returns {Promise<Object>} Result object with success status and transaction details
      */
     async processDonation(donationData) {
         await this.delay();
@@ -67,7 +80,9 @@ export class MockAPI {
     }
 
     /**
-     * Get grid state (in a real app, this would fetch from backend)
+     * Retrieves current grid state from backend (simulated)
+     * In production, this would fetch the actual grid data
+     * @returns {Promise<Object>} Result object with grid state data
      */
     async getGridState() {
         await this.delay(200);
@@ -79,7 +94,14 @@ export class MockAPI {
     }
 
     /**
-     * Generate tax receipt
+     * Generates a tax-deductible receipt for a donation
+     * @param {Object} receiptData - Receipt information
+     * @param {string} receiptData.transactionId - Unique transaction identifier
+     * @param {string} receiptData.email - Donor's email address
+     * @param {number} receiptData.amount - Donation amount in dollars
+     * @param {Array<{x: number, y: number}>} receiptData.squares - Donated squares
+     * @param {string} receiptData.timestamp - ISO timestamp of transaction
+     * @returns {Promise<Object>} Result with receipt details
      */
     async generateReceipt(receiptData) {
         await this.delay(300);
@@ -104,7 +126,9 @@ export class MockAPI {
     }
 
     /**
-     * Validate email format
+     * Validates email address format using regex
+     * @param {string} email - Email address to validate
+     * @returns {boolean} True if email format is valid
      */
     isValidEmail(email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -112,7 +136,11 @@ export class MockAPI {
     }
 
     /**
-     * Send receipt via email (simulated)
+     * Sends receipt via email (simulated - logs to console)
+     * In production, this would trigger an actual email send
+     * @param {string} email - Recipient email address
+     * @param {Object} receipt - Receipt data to send
+     * @returns {Promise<Object>} Result with success status and message
      */
     async sendReceiptEmail(email, receipt) {
         await this.delay();

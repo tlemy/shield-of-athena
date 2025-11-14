@@ -4,7 +4,18 @@
 
 export class ReceiptGenerator {
     /**
-     * Generate HTML receipt
+     * Generates a formatted HTML receipt for tax-deductible donations
+     * @param {Object} receiptData - Receipt information
+     * @param {string} receiptData.transactionId - Unique transaction identifier
+     * @param {string} receiptData.email - Donor's email address
+     * @param {number} receiptData.amount - Donation amount in dollars
+     * @param {Array<{x: number, y: number}>} receiptData.squares - Donated squares
+     * @param {string} receiptData.timestamp - ISO timestamp of transaction
+     * @param {string} receiptData.organizationName - Charity organization name
+     * @param {string} receiptData.organizationEIN - Tax EIN number
+     * @param {string} receiptData.receiptNumber - Unique receipt number
+     * @param {string} receiptData.notes - Additional tax information
+     * @returns {string} Complete HTML document as string
      */
     generateReceiptHTML(receiptData) {
         const {
@@ -167,7 +178,8 @@ export class ReceiptGenerator {
     }
 
     /**
-     * Display receipt in a new window
+     * Opens receipt in a new window with print dialog
+     * @param {Object} receiptData - Receipt information (see generateReceiptHTML for structure)
      */
     displayReceipt(receiptData) {
         const html = this.generateReceiptHTML(receiptData);
@@ -187,7 +199,8 @@ export class ReceiptGenerator {
     }
 
     /**
-     * Download receipt as HTML file
+     * Downloads receipt as an HTML file to user's device
+     * @param {Object} receiptData - Receipt information (see generateReceiptHTML for structure)
      */
     downloadReceipt(receiptData) {
         const html = this.generateReceiptHTML(receiptData);
@@ -203,7 +216,9 @@ export class ReceiptGenerator {
     }
 
     /**
-     * Generate plain text receipt for email
+     * Generates a plain text receipt suitable for email or console
+     * @param {Object} receiptData - Receipt information (see generateReceiptHTML for structure)
+     * @returns {string} Plain text formatted receipt
      */
     generateReceiptText(receiptData) {
         const {

@@ -9,12 +9,22 @@ import { GridRenderer } from './grid-renderer.js';
 import { DonationModal } from './donation-modal.js';
 
 class ShieldCanvasComponent {
+    /**
+     * Creates the main ShieldCanvas component manager
+     * Manages multiple canvas instances
+     */
     constructor() {
         this.instances = new Map();
     }
 
     /**
-     * Initialize Shield Canvas component
+     * Initializes a new Shield Canvas instance in the specified container
+     * @param {string} containerId - DOM element ID for the container
+     * @param {Object} options - Configuration options
+     * @param {number} [options.gridSize=250] - Grid size (squares per side)
+     * @param {number} [options.squarePrice=0.07] - Price per square in dollars
+     * @param {number} [options.lockDuration=604800000] - Lock duration in milliseconds (default: 7 days)
+     * @returns {Object|null} Instance object or null if container not found
      */
     init(containerId, options = {}) {
         const container = document.getElementById(containerId);
@@ -71,7 +81,12 @@ class ShieldCanvasComponent {
     }
 
     /**
-     * Create control panel
+     * Creates the control panel UI with buttons and controls
+     * @param {HTMLElement} wrapper - Wrapper element to append panel to
+     * @param {GridRenderer} gridRenderer - Grid renderer instance
+     * @param {DonationModal} donationModal - Donation modal instance
+     * @param {StateManager} stateManager - State manager instance
+     * @returns {HTMLElement} Control panel element
      */
     createControlPanel(wrapper, gridRenderer, donationModal, stateManager) {
         const panel = document.createElement('div');
@@ -124,7 +139,12 @@ class ShieldCanvasComponent {
     }
 
     /**
-     * Attach control panel event listeners
+     * Attaches all event listeners to control panel buttons
+     * Handles donate, zoom, navigation, and paint mode controls
+     * @param {HTMLElement} panel - Control panel element
+     * @param {GridRenderer} gridRenderer - Grid renderer instance
+     * @param {DonationModal} donationModal - Donation modal instance
+     * @param {StateManager} stateManager - State manager instance
      */
     attachControlListeners(panel, gridRenderer, donationModal, stateManager) {
         const donateBtn = panel.querySelector('#donateBtn');
@@ -360,7 +380,8 @@ class ShieldCanvasComponent {
     }
 
     /**
-     * Destroy instance
+     * Destroys a canvas instance and cleans up resources
+     * @param {string} containerId - DOM element ID of the instance to destroy
      */
     destroy(containerId) {
         const instance = this.instances.get(containerId);
@@ -373,7 +394,9 @@ class ShieldCanvasComponent {
     }
 
     /**
-     * Get instance
+     * Retrieves a canvas instance by container ID
+     * @param {string} containerId - DOM element ID of the instance
+     * @returns {Object|undefined} Instance object or undefined if not found
      */
     getInstance(containerId) {
         return this.instances.get(containerId);

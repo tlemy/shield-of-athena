@@ -3,6 +3,13 @@
  */
 
 export class DonationModal {
+    /**
+     * Creates a new DonationModal instance
+     * @param {number} squarePrice - Price per square in dollars
+     * @param {MockAPI} mockAPI - API service for processing donations
+     * @param {ReceiptGenerator} receiptGenerator - Service for generating receipts
+     * @param {StateManager} stateManager - State management service
+     */
     constructor(squarePrice, mockAPI, receiptGenerator, stateManager) {
         this.squarePrice = squarePrice;
         this.mockAPI = mockAPI;
@@ -13,7 +20,9 @@ export class DonationModal {
     }
 
     /**
-     * Show donation modal
+     * Displays the donation modal with selected squares
+     * @param {Array<{x: number, y: number}>} selectedSquares - Squares to be donated
+     * @param {Function} onComplete - Callback function called after donation completes
      */
     show(selectedSquares, onComplete) {
         this.onComplete = onComplete;
@@ -21,7 +30,7 @@ export class DonationModal {
     }
 
     /**
-     * Hide modal
+     * Hides and removes the modal from the DOM
      */
     hide() {
         if (this.modal) {
@@ -31,7 +40,8 @@ export class DonationModal {
     }
 
     /**
-     * Create modal element
+     * Creates and displays the modal DOM element with form
+     * @param {Array<{x: number, y: number}>} selectedSquares - Squares for donation
      */
     createModal(selectedSquares) {
         // Remove existing modal if any
@@ -131,7 +141,10 @@ export class DonationModal {
     }
 
     /**
-     * Attach event listeners to modal
+     * Attaches all event listeners to modal elements
+     * Handles close, color selection, and form submission
+     * @param {Array<{x: number, y: number}>} selectedSquares - Squares for donation
+     * @param {number} totalAmount - Total donation amount in dollars
      */
     attachModalListeners(selectedSquares, totalAmount) {
         const closeBtn = this.modal.querySelector('.close-btn');
@@ -172,7 +185,10 @@ export class DonationModal {
     }
 
     /**
-     * Handle form submission
+     * Handles donation form submission and processes the donation
+     * Validates input, calls API, updates grid state, and generates receipt
+     * @param {Array<{x: number, y: number}>} selectedSquares - Squares to donate
+     * @param {number} totalAmount - Total donation amount in dollars
      */
     async handleSubmit(selectedSquares, totalAmount) {
         const form = this.modal.querySelector('#donationForm');
@@ -244,7 +260,8 @@ export class DonationModal {
     }
 
     /**
-     * Show success message and receipt
+     * Displays success message and receipt actions after donation
+     * @param {Object} receiptData - Receipt information for the completed donation
      */
     showSuccess(receiptData) {
         const modalBody = this.modal.querySelector('.modal-body');

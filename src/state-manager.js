@@ -3,6 +3,11 @@
  */
 
 export class StateManager {
+    /**
+     * Creates a new StateManager for grid persistence and expiry logic
+     * @param {number} gridSize - Size of the grid (squares per side)
+     * @param {number} lockDuration - Duration squares remain locked in milliseconds
+     */
     constructor(gridSize, lockDuration) {
         this.gridSize = gridSize;
         this.lockDuration = lockDuration;
@@ -14,7 +19,9 @@ export class StateManager {
     }
 
     /**
-     * Load state from localStorage or initialize empty grid
+     * Loads grid state from localStorage or initializes empty grid
+     * Automatically cleans expired squares
+     * @returns {Object} Grid state object with square data keyed by "x,y"
      */
     loadState() {
         try {
@@ -31,7 +38,7 @@ export class StateManager {
     }
 
     /**
-     * Save current state to localStorage
+     * Persists current grid state to localStorage
      */
     saveState() {
         try {
@@ -42,7 +49,8 @@ export class StateManager {
     }
 
     /**
-     * Load ownership data from localStorage
+     * Loads ownership tracking data from localStorage
+     * @returns {Object} Ownership data keyed by transaction ID
      */
     loadOwnership() {
         try {
@@ -57,7 +65,7 @@ export class StateManager {
     }
 
     /**
-     * Save ownership data to localStorage
+     * Persists ownership tracking data to localStorage
      */
     saveOwnership() {
         try {
@@ -68,7 +76,10 @@ export class StateManager {
     }
 
     /**
-     * Add owned squares for a transaction
+     * Records squares as owned by current user for a transaction
+     * @param {string} transactionId - Unique transaction identifier
+     * @param {Array<{x: number, y: number}>} squares - Array of square coordinates
+     * @param {string} originalColor - Original color hex code chosen at purchase
      */
     addOwnedSquares(transactionId, squares, originalColor) {
         this.ownership[transactionId] = {
@@ -80,7 +91,10 @@ export class StateManager {
     }
 
     /**
-     * Check if current user owns a square
+     * Checks if the current user owns a square at given coordinates
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @returns {boolean} True if user owns this square
      */
     isOwnedSquare(x, y) {
         const key = this.getKey(x, y);
@@ -94,7 +108,8 @@ export class StateManager {
     }
 
     /**
-     * Get all squares owned by current user
+     * Returns all squares owned by the current user
+     * @returns {Array<Object>} Array of square objects with transactionId
      */
     getOwnedSquares() {
         const owned = [];
@@ -111,7 +126,11 @@ export class StateManager {
     }
 
     /**
-     * Get original purchase color for a square
+     * Gets the original color chosen when square was purchased
+     * Used for erase/reset functionality
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @returns {string} Hex color code of original color
      */
     getOriginalColor(x, y) {
         const key = this.getKey(x, y);
@@ -125,7 +144,9 @@ export class StateManager {
     }
 
     /**
-     * Get transactions with their squares
+     * Returns all transactions with their associated squares
+     * Sorted by timestamp (newest first)
+     * @returns {Array<Object>} Array of transaction objects
      */
     getTransactions() {
         const transactions = [];
@@ -156,7 +177,9 @@ export class StateManager {
     }
 
     /**
-     * Get bounding box for a set of squares
+     * Calculates the bounding box for a set of squares
+     * @param {Array<{x: number, y: number}>} squares - Array of square coordinates
+     * @returns {{minX: number, maxX: number, minY: number, maxY: number}|null} Bounding box or null if empty
      */
     getSquaresBounds(squares) {
         if (squares.length === 0) return null;
@@ -177,7 +200,8 @@ export class StateManager {
     }
 
     /**
-     * Remove expired squares from grid
+     * Removes expired squares from the grid based on expiry time
+     * @param {Object} grid - Grid object to clean
      */
     cleanExpiredSquares(grid) {
         const now = Date.now();
@@ -196,14 +220,19 @@ export class StateManager {
     }
 
     /**
-     * Convert x,y coordinates to storage key
+     * Converts x,y coordinates to storage key string
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @returns {string} Key in format "x,y"
      */
     getKey(x, y) {
         return `${x},${y}`;
     }
 
     /**
-     * Parse storage key back to coordinates
+     * Parses a storage key string back to coordinates
+     * @param {string} key - Key in format "x,y"
+     * @returns {{x: number, y: number}} Coordinate object
      */
     parseKey(key) {
         const [x, y] = key.split(',').map(Number);
@@ -211,7 +240,10 @@ export class StateManager {
     }
 
     /**
-     * Get square data at position
+     * Retrieves square data at given coordinates
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @returns {Object|null} Square data object or null if not found
      */
     getSquare(x, y) {
         const key = this.getKey(x, y);
@@ -219,7 +251,11 @@ export class StateManager {
     }
 
     /**
-     * Check if square is available (not locked or expired)
+     * Checks if a square is available for donation (not locked or expired)
+     * Automatically removes expired squares
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @returns {boolean} True if square is available
      */
     isSquareAvailable(x, y) {
         const square = this.getSquare(x, y);
@@ -236,7 +272,10 @@ export class StateManager {
     }
 
     /**
-     * Set square data
+     * Sets data for a single square with timestamp and expiry
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @param {Object} data - Square data (color, email, etc.)
      */
     setSquare(x, y, data) {
         const key = this.getKey(x, y);
@@ -252,7 +291,8 @@ export class StateManager {
     }
 
     /**
-     * Set multiple squares at once
+     * Sets data for multiple squares at once (batch operation)
+     * @param {Array<{x: number, y: number, color: string, email: string}>} squares - Array of square data
      */
     setSquares(squares) {
         squares.forEach(({ x, y, color, email }) => {
@@ -271,7 +311,12 @@ export class StateManager {
     }
 
     /**
-     * Update color of an owned square
+     * Updates the color of an owned square (paint functionality)
+     * Only works if current user owns the square
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @param {string} newColor - New hex color code
+     * @returns {boolean} True if update succeeded
      */
     updateSquareColor(x, y, newColor) {
         if (!this.isOwnedSquare(x, y)) {
@@ -295,7 +340,9 @@ export class StateManager {
     }
 
     /**
-     * Remove square data
+     * Removes square data from the grid
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
      */
     removeSquare(x, y) {
         const key = this.getKey(x, y);
@@ -305,14 +352,18 @@ export class StateManager {
     }
 
     /**
-     * Get all squares
+     * Returns all squares in the grid as an array
+     * @returns {Array<Object>} Array of all square data objects
      */
     getAllSquares() {
         return Object.values(this.grid);
     }
 
     /**
-     * Get time remaining for a square in milliseconds
+     * Gets remaining lock time for a square in milliseconds
+     * @param {number} x - Grid X coordinate
+     * @param {number} y - Grid Y coordinate
+     * @returns {number} Remaining time in milliseconds (0 if expired/available)
      */
     getTimeRemaining(x, y) {
         const square = this.getSquare(x, y);
@@ -323,7 +374,9 @@ export class StateManager {
     }
 
     /**
-     * Format time remaining as human-readable string
+     * Formats time remaining as a human-readable string
+     * @param {number} ms - Time in milliseconds
+     * @returns {string} Formatted string (e.g., "2d 5h remaining")
      */
     formatTimeRemaining(ms) {
         if (ms <= 0) return 'Available';
@@ -342,14 +395,17 @@ export class StateManager {
     }
 
     /**
-     * Export grid state as JSON
+     * Exports grid state as formatted JSON string
+     * @returns {string} JSON string of grid state
      */
     exportState() {
         return JSON.stringify(this.grid, null, 2);
     }
 
     /**
-     * Import grid state from JSON
+     * Imports grid state from JSON string and validates/cleans it
+     * @param {string} jsonString - JSON string containing grid state
+     * @returns {boolean} True if import succeeded
      */
     importState(jsonString) {
         try {
@@ -366,7 +422,7 @@ export class StateManager {
     }
 
     /**
-     * Clear all data
+     * Clears all grid data and persists the empty state
      */
     clearAll() {
         this.grid = {};
@@ -375,28 +431,31 @@ export class StateManager {
     }
 
     /**
-     * Add change listener
+     * Registers a callback to be notified of state changes
+     * @param {Function} callback - Callback function receiving change data
      */
     addListener(callback) {
         this.listeners.push(callback);
     }
 
     /**
-     * Remove change listener
+     * Unregisters a previously registered change listener
+     * @param {Function} callback - Callback function to remove
      */
     removeListener(callback) {
         this.listeners = this.listeners.filter(cb => cb !== callback);
     }
 
     /**
-     * Notify all listeners of state change
+     * Notifies all registered listeners of a state change
+     * @param {Object} changeData - Information about what changed
      */
     notifyListeners(changeData) {
         this.listeners.forEach(callback => callback(changeData));
     }
 
     /**
-     * Start periodic cleanup of expired squares
+     * Starts periodic cleanup timer to remove expired squares every 5 minutes
      */
     startCleanupTimer() {
         // Clean up every 5 minutes
@@ -407,7 +466,7 @@ export class StateManager {
     }
 
     /**
-     * Stop cleanup timer
+     * Stops the periodic cleanup timer
      */
     stopCleanupTimer() {
         if (this.cleanupInterval) {
