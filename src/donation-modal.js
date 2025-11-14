@@ -1,0 +1,464 @@
+/**
+ * Donation Modal - Handles donation UI and user interaction
+ */
+
+export class DonationModal {
+    constructor(squarePrice, mockAPI, receiptGenerator, stateManager) {
+        this.squarePrice = squarePrice;
+        this.mockAPI = mockAPI;
+        this.receiptGenerator = receiptGenerator;
+        this.stateManager = stateManager;
+        this.modal = null;
+        this.onComplete = null;
+    }
+
+    /**
+     * Show donation modal
+     */
+    show(selectedSquares, onComplete) {
+        this.onComplete = onComplete;
+        this.createModal(selectedSquares);
+    }
+
+    /**
+     * Hide modal
+     */
+    hide() {
+        if (this.modal) {
+            this.modal.remove();
+            this.modal = null;
+        }
+    }
+
+    /**
+     * Create modal element
+     */
+    createModal(selectedSquares) {
+        // Remove existing modal if any
+        this.hide();
+        
+        const totalAmount = selectedSquares.length * this.squarePrice;
+        
+        this.modal = document.createElement('div');
+        this.modal.className = 'donation-modal';
+        this.modal.innerHTML = `
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Complete Your Donation</h2>
+                    <button class="close-btn" aria-label="Close">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="donation-summary">
+                        <div class="summary-row">
+                            <span>Squares Selected:</span>
+                            <strong>${selectedSquares.length}</strong>
+                        </div>
+                        <div class="summary-row">
+                            <span>Price per Square:</span>
+                            <strong>$${this.squarePrice.toFixed(2)}</strong>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total Donation:</span>
+                            <strong>$${totalAmount.toFixed(2)}</strong>
+                        </div>
+                    </div>
+                    
+                    <form class="donation-form" id="donationForm">
+                        <div class="form-group">
+                            <label for="colorPicker">Choose Your Color:</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="colorPicker" name="color" value="#4CAF50" required>
+                                <div class="color-presets">
+                                    <button type="button" class="color-preset" data-color="#FF0000" style="background: #FF0000;" title="Red"></button>
+                                    <button type="button" class="color-preset" data-color="#00FF00" style="background: #00FF00;" title="Green"></button>
+                                    <button type="button" class="color-preset" data-color="#0000FF" style="background: #0000FF;" title="Blue"></button>
+                                    <button type="button" class="color-preset" data-color="#FFFF00" style="background: #FFFF00;" title="Yellow"></button>
+                                    <button type="button" class="color-preset" data-color="#FF00FF" style="background: #FF00FF;" title="Magenta"></button>
+                                    <button type="button" class="color-preset" data-color="#00FFFF" style="background: #00FFFF;" title="Cyan"></button>
+                                    <button type="button" class="color-preset" data-color="#000000" style="background: #000000;" title="Black"></button>
+                                    <button type="button" class="color-preset" data-color="#FFFFFF" style="background: #FFFFFF; border: 1px solid #ddd;" title="White"></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address:</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                placeholder="your.email@example.com"
+                                required
+                            >
+                            <small>For your tax-deductible receipt</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="terms" required>
+                                <span>I understand this is a charitable donation and my squares will be locked for 7 days</span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                Donate $${totalAmount.toFixed(2)}
+                            </button>
+                        </div>
+                        
+                        <div class="processing-message" style="display: none;">
+                            <div class="spinner"></div>
+                            <p>Processing your donation...</p>
+                        </div>
+                        
+                        <div class="error-message" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(this.modal);
+        this.attachModalListeners(selectedSquares, totalAmount);
+        
+        // Focus on email input
+        setTimeout(() => {
+            const emailInput = this.modal.querySelector('#email');
+            if (emailInput) emailInput.focus();
+        }, 100);
+    }
+
+    /**
+     * Attach event listeners to modal
+     */
+    attachModalListeners(selectedSquares, totalAmount) {
+        const closeBtn = this.modal.querySelector('.close-btn');
+        const cancelBtn = this.modal.querySelector('#cancelBtn');
+        const overlay = this.modal.querySelector('.modal-overlay');
+        const form = this.modal.querySelector('#donationForm');
+        const colorPicker = this.modal.querySelector('#colorPicker');
+        const colorPresets = this.modal.querySelectorAll('.color-preset');
+        
+        // Close handlers
+        const closeModal = () => this.hide();
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', closeModal);
+        
+        // ESC key to close
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+        
+        // Color preset buttons
+        colorPresets.forEach(preset => {
+            preset.addEventListener('click', () => {
+                const color = preset.getAttribute('data-color');
+                colorPicker.value = color;
+            });
+        });
+        
+        // Form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSubmit(selectedSquares, totalAmount);
+        });
+    }
+
+    /**
+     * Handle form submission
+     */
+    async handleSubmit(selectedSquares, totalAmount) {
+        const form = this.modal.querySelector('#donationForm');
+        const submitBtn = this.modal.querySelector('#submitBtn');
+        const processingMsg = this.modal.querySelector('.processing-message');
+        const errorMsg = this.modal.querySelector('.error-message');
+        const colorPicker = this.modal.querySelector('#colorPicker');
+        const emailInput = this.modal.querySelector('#email');
+        
+        // Get form values
+        const color = colorPicker.value;
+        const email = emailInput.value.trim();
+        
+        // Disable form
+        submitBtn.disabled = true;
+        processingMsg.style.display = 'block';
+        errorMsg.style.display = 'none';
+        
+        try {
+            // Process donation through mock API
+            const donationResult = await this.mockAPI.processDonation({
+                email,
+                squares: selectedSquares,
+                color,
+                totalAmount
+            });
+            
+            if (!donationResult.success) {
+                throw new Error(donationResult.error || 'Donation failed');
+            }
+            
+            // Update grid state
+            const squaresWithColor = selectedSquares.map(s => ({
+                ...s,
+                color,
+                email
+            }));
+            this.stateManager.setSquares(squaresWithColor);
+            
+            // Track ownership
+            this.stateManager.addOwnedSquares(donationResult.transactionId, selectedSquares);
+            
+            // Generate receipt
+            const receiptResult = await this.mockAPI.generateReceipt({
+                transactionId: donationResult.transactionId,
+                email,
+                amount: totalAmount,
+                squares: selectedSquares,
+                timestamp: donationResult.timestamp
+            });
+            
+            if (receiptResult.success) {
+                // Show success and display receipt
+                this.showSuccess(receiptResult.receipt);
+            }
+            
+            // Notify completion
+            if (this.onComplete) {
+                this.onComplete(true);
+            }
+            
+        } catch (error) {
+            // Show error
+            errorMsg.textContent = error.message;
+            errorMsg.style.display = 'block';
+            processingMsg.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+
+    /**
+     * Show success message and receipt
+     */
+    showSuccess(receiptData) {
+        const modalBody = this.modal.querySelector('.modal-body');
+        
+        modalBody.innerHTML = `
+            <div class="success-message">
+                <div class="success-icon">✓</div>
+                <h3>Donation Successful!</h3>
+                <p>Thank you for your contribution!</p>
+                <p>Your squares have been locked for 7 days.</p>
+                
+                <div class="receipt-actions">
+                    <button class="btn btn-primary" id="viewReceiptBtn">View Receipt</button>
+                    <button class="btn btn-secondary" id="downloadReceiptBtn">Download Receipt</button>
+                </div>
+                
+                <button class="btn btn-text" id="closeSuccessBtn">Close</button>
+            </div>
+        `;
+        
+        // Attach receipt actions
+        const viewBtn = this.modal.querySelector('#viewReceiptBtn');
+        const downloadBtn = this.modal.querySelector('#downloadReceiptBtn');
+        const closeBtn = this.modal.querySelector('#closeSuccessBtn');
+        
+        viewBtn.addEventListener('click', () => {
+            this.receiptGenerator.displayReceipt(receiptData);
+        });
+        
+        downloadBtn.addEventListener('click', () => {
+            this.receiptGenerator.downloadReceipt(receiptData);
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            this.hide();
+        });
+    }
+
+    /**
+     * Show color edit modal for owned square
+     */
+    showEditModal(x, y, onComplete) {
+        const square = this.stateManager.getSquare(x, y);
+        if (!square || !this.stateManager.isOwnedSquare(x, y)) {
+            return;
+        }
+
+        this.onComplete = onComplete;
+        
+        // Remove existing modal if any
+        this.hide();
+        
+        this.modal = document.createElement('div');
+        this.modal.className = 'donation-modal';
+        this.modal.innerHTML = `
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Edit Square Color</h2>
+                    <button class="close-btn" aria-label="Close">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="donation-summary">
+                        <div class="summary-row">
+                            <span>Square Position:</span>
+                            <strong>(${x}, ${y})</strong>
+                        </div>
+                        <div class="summary-row">
+                            <span>Current Color:</span>
+                            <strong><span style="display:inline-block;width:20px;height:20px;background:${square.color};border:1px solid #ddd;vertical-align:middle;"></span> ${square.color}</strong>
+                        </div>
+                        <div class="summary-row">
+                            <span>Time Remaining:</span>
+                            <strong>${this.stateManager.formatTimeRemaining(this.stateManager.getTimeRemaining(x, y))}</strong>
+                        </div>
+                    </div>
+                    
+                    <form class="donation-form" id="editColorForm">
+                        <div class="form-group">
+                            <label for="colorPicker">Choose New Color:</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="colorPicker" name="color" value="${square.color}" required>
+                                <div class="color-presets">
+                                    <button type="button" class="color-preset" data-color="#FF0000" style="background: #FF0000;" title="Red"></button>
+                                    <button type="button" class="color-preset" data-color="#00FF00" style="background: #00FF00;" title="Green"></button>
+                                    <button type="button" class="color-preset" data-color="#0000FF" style="background: #0000FF;" title="Blue"></button>
+                                    <button type="button" class="color-preset" data-color="#FFFF00" style="background: #FFFF00;" title="Yellow"></button>
+                                    <button type="button" class="color-preset" data-color="#FF00FF" style="background: #FF00FF;" title="Magenta"></button>
+                                    <button type="button" class="color-preset" data-color="#00FFFF" style="background: #00FFFF;" title="Cyan"></button>
+                                    <button type="button" class="color-preset" data-color="#000000" style="background: #000000;" title="Black"></button>
+                                    <button type="button" class="color-preset" data-color="#FFFFFF" style="background: #FFFFFF; border: 1px solid #ddd;" title="White"></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="edit-info"><strong>Free unlimited edits</strong> during your 7-day lock period!</p>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                Update Color
+                            </button>
+                        </div>
+                        
+                        <div class="processing-message" style="display: none;">
+                            <div class="spinner"></div>
+                            <p>Updating color...</p>
+                        </div>
+                        
+                        <div class="error-message" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(this.modal);
+        this.attachEditModalListeners(x, y);
+        
+        // Focus on color picker
+        setTimeout(() => {
+            const colorPicker = this.modal.querySelector('#colorPicker');
+            if (colorPicker) colorPicker.focus();
+        }, 100);
+    }
+
+    /**
+     * Attach event listeners to edit modal
+     */
+    attachEditModalListeners(x, y) {
+        const closeBtn = this.modal.querySelector('.close-btn');
+        const cancelBtn = this.modal.querySelector('#cancelBtn');
+        const overlay = this.modal.querySelector('.modal-overlay');
+        const form = this.modal.querySelector('#editColorForm');
+        const colorPicker = this.modal.querySelector('#colorPicker');
+        const colorPresets = this.modal.querySelectorAll('.color-preset');
+        
+        // Close handlers
+        const closeModal = () => this.hide();
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', closeModal);
+        
+        // ESC key to close
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+        
+        // Color preset buttons
+        colorPresets.forEach(preset => {
+            preset.addEventListener('click', () => {
+                const color = preset.getAttribute('data-color');
+                colorPicker.value = color;
+            });
+        });
+        
+        // Form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleEditSubmit(x, y);
+        });
+    }
+
+    /**
+     * Handle edit form submission
+     */
+    async handleEditSubmit(x, y) {
+        const form = this.modal.querySelector('#editColorForm');
+        const submitBtn = this.modal.querySelector('#submitBtn');
+        const processingMsg = this.modal.querySelector('.processing-message');
+        const errorMsg = this.modal.querySelector('.error-message');
+        const colorPicker = this.modal.querySelector('#colorPicker');
+        
+        // Get new color
+        const newColor = colorPicker.value;
+        
+        // Disable form
+        submitBtn.disabled = true;
+        processingMsg.style.display = 'block';
+        errorMsg.style.display = 'none';
+        
+        try {
+            // Simulate brief delay
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Update color
+            const success = this.stateManager.updateSquareColor(x, y, newColor);
+            
+            if (!success) {
+                throw new Error('Failed to update color');
+            }
+            
+            // Show brief success message
+            processingMsg.innerHTML = '<p style="color: #4CAF50;">✓ Color updated successfully!</p>';
+            
+            // Close after short delay
+            setTimeout(() => {
+                this.hide();
+                if (this.onComplete) {
+                    this.onComplete(true);
+                }
+            }, 800);
+            
+        } catch (error) {
+            // Show error
+            errorMsg.textContent = error.message;
+            errorMsg.style.display = 'block';
+            processingMsg.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+}
+
